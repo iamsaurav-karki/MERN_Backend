@@ -1,33 +1,29 @@
 const router = require("express").Router();
+const authCtrl = require("./auth.controller");
+const multer = require("multer");
+const fs = require("fs");
+const memoryStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    let path = "./public/uploads/user";
+    if (!fs.existSync(path)) {
+      fs.mkdirSync(path, { recursive: true });
+    }
+    cb(null, path);
+  },
+});
+const uploader = multer({
+  storage: memoryStorage,
+});
 
 // Auth and Authorization routes start:
 
-router.post("/register", (req, res, next) => {
-  try {
-    //business logic
-    let payload = req.body;
-    res.json({
-      result: payload,
-    });
-  } catch (excep) {
-    next(excep);
-    // next({ code: 400, message: "Validation failure" }); //next scope with two parameters is always for error handling.
-  }
-});
-router.get("/verify-token/:token", (req, res, next) => {});
-router.post("/set-password/:token", (req, res, next) => {});
+router.post("/register", authCtrl.register);
+router.get("/verify-token/:token", authCtrl.VerifyToken);
+router.post("/set-password/:token", authCtrl.SetPassword);
 
-router.post("/Login", (req, res, next) => {});
-router.post("/forgot-password", (req, res, next) => {});
-router.get(
-  "/me",
-  (req, res, next) => {},
-  (req, res, next) => {}
-);
-router.post(
-  "/logout",
-  (req, res, next) => {},
-  (req, res, next) => {}
-);
+router.post("/Login", authCtrl.Login);
+router.post("/forgot-password", authCtrl.forgotPassword);
+router.get("/me", (req, res, next) => {}, authCtrl.SelfProfiling);
+router.post("/logout", (req, res, next) => {}, authCtrl.Logout);
 
 module.exports = router;
